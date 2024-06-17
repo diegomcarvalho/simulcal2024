@@ -54,7 +54,7 @@ hfont = {"fontname": "Avenir"}
 workdays = [1, 3, 4, 5]
 
 
-def day_color(day: datetime, offset_ferias) -> tuple[int, int]:
+def day_color(day: datetime, offset_ferias, prim_ferias) -> tuple[int, int]:
     if day.weekday() == 6:
         return DAY_TYPE.SUNDAY.value, 0
 
@@ -105,7 +105,7 @@ def day_color(day: datetime, offset_ferias) -> tuple[int, int]:
     if day.year == 2025:
         val = DAY_TYPE.VACATION.value
         start_date = datetime(2025, 1, 1) + timedelta(offset_ferias)
-        period = [start_date + timedelta(n) for n in range(28)]
+        period = [start_date + timedelta(n) for n in range(prim_ferias)]
         if day in period:
             return val, 0
 
@@ -125,7 +125,7 @@ def day_color(day: datetime, offset_ferias) -> tuple[int, int]:
     return DAY_TYPE.WORKDAY.value, 1
 
 
-def create_csv(offset_ferias):
+def create_csv(offset_ferias, prim_ferias):
     delta = timedelta(days=1)
     day = datetime(year=2024, month=1, day=1)
     num_ranges = 366 + 365 + 365
@@ -137,7 +137,7 @@ def create_csv(offset_ferias):
         for _ in range(num_ranges):
             day_str = day.strftime("%Y-%m-%d")
 
-            day_type, count_day = day_color(day, offset_ferias)
+            day_type, count_day = day_color(day, offset_ferias, prim_ferias)
 
             num_day += count_day
 
@@ -166,8 +166,9 @@ def main():
     st_init()
 
     offset_ferias = st.slider("Dias de Offset nas férias", 0, 60, 0)
+    prim_ferias = st.slider("Dias de Offset nas férias", 0, 45, 28)
 
-    create_csv(offset_ferias)
+    create_csv(offset_ferias, prim_ferias)
 
     df = pd.read_csv("cal.csv")
     df.ds = pd.to_datetime(df.ds)
